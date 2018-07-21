@@ -34,16 +34,17 @@ struct answer_and_question {
 
 int main(int argc,char** argv)
 {
-	DIR *files_dir;					// Filesディレクトリ
+	DIR *files_dir;					// Files ディレクトリ
 	struct dirent *dp;				// ディレクトリのデータを扱う構造体
 	FILE *reading_fp,				// 出題ファイルを格納
 	     *cmd_fp;					// コマンドの出力を格納
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体 (後で動的配列確保へ変更)
 	struct answer_and_question answer_and_question_s[1024]; // 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
-		os_name[128],				// unameコマンドの結果を格納する、128の数値は適当
-		user_input_y_or_n,			// ユーザ入力の y か n を格納する
-		user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
+	     mkdir_path[6] = "mkdir ",				// Files ディレクトリ作成用
+	     os_name[128],				// unameコマンドの結果を格納する、128の数値は適当
+	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
+	     user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
 		      number_of_files;			// 出題ファイル数
 	unsigned short user_input_num,			// ユーザーの入力した数値
@@ -51,7 +52,7 @@ int main(int argc,char** argv)
 		       number_of_end_question = 0;		// 最後の出題の行番号
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 
-	// os識別いるかいらないかわからん
+	// os識別いるかいらないかわからん(今の仕様だといらない)
 	if ((cmd_fp = popen("uname", "r")) == NULL) {
 		err(EXIT_FAILURE, "%s", "uname");
 	}
@@ -60,11 +61,26 @@ int main(int argc,char** argv)
 		// os が Linux だった場合
 		if (!strcmp("Linux\n", os_name)){
 		getcwd(files_dir_path, PATH_MAX);
-		printf("%s\n", files_dir_path);
 		// 文字連結,オーバーフロー時のエラー処理を書くこと
 		strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
 		// directory open
 		files_dir = opendir(files_dir_path);
+		// directory open
+
+		if (!(files_dir = opendir(files_dir_path))) {
+			printf("%s ディレクトリが存在しません。\n作成してもよろしいですか?(y/n)\n", files_dir_path);
+			scanf("%c", &user_input_y_or_n);
+			getchar();	// 標準入力を空にする
+
+			if ('y' == user_input_y_or_n) {
+				strncat(mkdir_path, files_dir_path, PATH_MAX);
+				printf("%s\n", mkdir_path);
+				system(mkdir_path);
+			}
+
+			exit(EXIT_FAILURE);
+		}
+
 		// 出題ファイルが格納されているディレクトリまで移動
 		chdir(files_dir_path);
 
@@ -72,17 +88,23 @@ int main(int argc,char** argv)
 				/*	. と .. は一覧に代入しない	*/
 				if ((!strcmp(dp->d_name,".")) || (!strcmp(dp->d_name,".."))) {
 					continue;
-					printf("%s", os_name);
 				}
 
 				filelist_s[cnt].file_number = cnt + 1;
 				strcpy(filelist_s[cnt].file_name, dp->d_name);
-				cnt++;		// <-???
+				cnt++;
 			}
+
+		if (0 == cnt) {
+			printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
+			exit(EXIT_SUCCESS);
+		};
 
 		} else {
 			err(EXIT_FAILURE, "%s", "uname unknoun");
 		}
+
+		printf("%s\n", files_dir_path);
 
 		// directory open
 		if (!(files_dir = opendir(files_dir_path))) {
