@@ -16,9 +16,8 @@
 #include <err.h>
 
 
-#define FILES_DIR_NAME	"Files/"	// 出題ファイル格納ディレクトリ
+#define FILES_DIR_NAME	"/Files/"	// 出題ファイル格納ディレクトリ
 #define FILES_MAX 256			// 取り扱う出題ファイル数の最大
-
 #define STRINGS_MAX 1024		// 一つの文字列の最大
 
 struct filelist_struct {		// 番号とファイル名の組み合わせ、後で動的配列確保に変更
@@ -36,22 +35,15 @@ struct answer_and_question {
 int main(int argc,char** argv)
 {
 	DIR *files_dir;					// Filesディレクトリ
-
 	struct dirent *dp;				// ディレクトリのデータを扱う構造体
-
 	FILE *reading_fp,				// 出題ファイルを格納
 	     *cmd_fp;					// コマンドの出力を格納
-
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体 (後で動的配列確保へ変更)
-
-	struct answer_and_question answer_and_question_s[1024];
-							// 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
-
-	char files_dir_path[PATH_MAX], 		// 出題ファイルのパス
+	struct answer_and_question answer_and_question_s[1024]; // 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
+	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
 		os_name[128],				// unameコマンドの結果を格納する、128の数値は適当
 		user_input_y_or_n,			// ユーザ入力の y か n を格納する
 		user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
-
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
 		      number_of_files;			// 出題ファイル数
 	unsigned short user_input_num,			// ユーザーの入力した数値
@@ -59,31 +51,24 @@ int main(int argc,char** argv)
 		       number_of_end_question = 0;		// 最後の出題の行番号
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 
+	// os識別いるかいらないかわからん
 	if ((cmd_fp = popen("uname", "r")) == NULL) {
 		err(EXIT_FAILURE, "%s", "uname");
 	}
 
 	if (fgets(os_name, sizeof(os_name), cmd_fp) != NULL) {
-
 		// os が Linux だった場合
 		if (!strcmp("Linux\n", os_name)){
-
 		getcwd(files_dir_path, PATH_MAX);
-		strncat(files_dir_path, "/", PATH_MAX);
-
 		printf("%s\n", files_dir_path);
-
 		// 文字連結,オーバーフロー時のエラー処理を書くこと
 		strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
-
 		// directory open
 		files_dir = opendir(files_dir_path);
-
 		// 出題ファイルが格納されているディレクトリまで移動
 		chdir(files_dir_path);
 
 			for (dp = readdir(files_dir), cnt = 0; dp != NULL; dp = readdir(files_dir)){
-
 				/*	. と .. は一覧に代入しない	*/
 				if ((!strcmp(dp->d_name,".")) || (!strcmp(dp->d_name,".."))) {
 					continue;
@@ -114,7 +99,7 @@ int main(int argc,char** argv)
 	number_of_files = cnt;		// 出題ファイルの量を代入
 
 	/*	出題ファイル選択ループ	*/
-	while(1) {
+	for (;;) {
 		/*	出題ファイル番号と出題ファイル名を出力	*/
 		for (cnt = 0;cnt < number_of_files; cnt++) {
 			printf("[%d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
@@ -122,8 +107,6 @@ int main(int argc,char** argv)
 
 		printf("出題ファイルを選択数値で選択してください\n");
 		printf("Please select afile and enter a numerical value: ");
-
-
 		scanf("%hd", &user_input_num);		// 後で最適かどうか調べる
 		getchar();				// 標準入力を空にする
 
@@ -141,7 +124,6 @@ int main(int argc,char** argv)
 		}
 	}
 
-
 	if ((reading_fp = fopen(filelist_s[user_input_num - 1].file_name, "r")) == NULL) {
 		printf("ファイルの読み込みに失敗しました。\n");
 		printf("file open error.\n");
@@ -154,7 +136,6 @@ int main(int argc,char** argv)
 		answer_and_question_s[cnt1].number = cnt1 + 1;
 		
 		for(cnt2 = 0 ;; cnt2++){
-
 			answer_and_question_s[cnt1].answer[cnt2] = getc(reading_fp);
 
 			if(answer_and_question_s[cnt1].answer[cnt2] == '\t') {
@@ -166,7 +147,6 @@ int main(int argc,char** argv)
 		}
 
 		for(cnt2 = 0; answer_and_question_s[cnt1].question[cnt2] != '\n'; cnt2++){
-
 			answer_and_question_s[cnt1].question[cnt2] = getc(reading_fp);
 
 			if(answer_and_question_s[cnt1].question[cnt2] == '\n') {
@@ -181,17 +161,14 @@ int main(int argc,char** argv)
 
 	
 	for (;;) {
-
 		printf("出題数：%d\n", question_max);
 		printf("全問出題しますか?(y/n)");
-
 		scanf("%c", &user_input_y_or_n);
 		getchar();	// 標準入力を空にする
 
 		printf("\n");
 
 		if ('y' == user_input_y_or_n) {
-
 			number_of_start_question = 0;
 			number_of_end_question = question_max;
 			break;
@@ -203,7 +180,6 @@ int main(int argc,char** argv)
 				printf("何問目から出題しますか?\n数値を入力して下さい:");
 				scanf("%hd", &user_input_num);
 				getchar();	// 標準入力を空にする
-
 
 				/*	入力エラーチェック	*/
 				if (user_input_num > question_max) {
@@ -221,12 +197,11 @@ int main(int argc,char** argv)
 
 			number_of_start_question = (user_input_num - 1);
 
-			for(;;){
+			for (;;) {
 				printf("出題数：%d\n", question_max);
 				printf("何問目まで出題しますか?\n数値を入力して下さい:");
 				scanf("%hd", &number_of_end_question);
 				getchar();	// 標準入力を空にする
-
 	
 				/*	入力エラーチェック	*/
 				if (number_of_end_question > question_max) {
@@ -256,7 +231,6 @@ int main(int argc,char** argv)
 
 	/*	出題	*/
 	for (cnt = number_of_start_question, cnt_of_question = 1; cnt < number_of_end_question; cnt++, cnt_of_question++) {
-
 		printf("question\t: #%hhu\nline number\t: #%lu\n", cnt_of_question, answer_and_question_s[cnt].number);
 		printf("Q: %s\n", answer_and_question_s[cnt].question);
 		scanf("%[^\t\n]", user_input_answer);	// 空白も入力できるようにする
