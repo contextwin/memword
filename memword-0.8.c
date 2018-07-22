@@ -41,7 +41,6 @@ int main(int argc,char** argv)
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体 (後で動的配列確保へ変更)
 	struct answer_and_question answer_and_question_s[1024]; // 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
-	     mkdir_path[6] = "mkdir ",				// Files ディレクトリ作成用
 	     os_name[128],				// unameコマンドの結果を格納する、128の数値は適当
 	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
 	     user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
@@ -68,17 +67,8 @@ int main(int argc,char** argv)
 		// directory open
 
 		if (!(files_dir = opendir(files_dir_path))) {
-			printf("%s ディレクトリが存在しません。\n作成してもよろしいですか?(y/n)\n", files_dir_path);
-			scanf("%c", &user_input_y_or_n);
-			getchar();	// 標準入力を空にする
-
-			if ('y' == user_input_y_or_n) {
-				strncat(mkdir_path, files_dir_path, PATH_MAX);
-				printf("%s\n", mkdir_path);
-				system(mkdir_path);
-			}
-
-			exit(EXIT_FAILURE);
+			printf("%s ディレクトリが存在しません。\n", files_dir_path);
+			exit(EXIT_SUCCESS);
 		}
 
 		// 出題ファイルが格納されているディレクトリまで移動
@@ -95,24 +85,16 @@ int main(int argc,char** argv)
 				cnt++;
 			}
 
-		if (0 == cnt) {
-			printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
-			exit(EXIT_SUCCESS);
-		};
+			if (0 == cnt) {
+				printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
+				exit(EXIT_SUCCESS);
+			};
 
 		} else {
 			err(EXIT_FAILURE, "%s", "uname unknoun");
 		}
 
 		printf("%s\n", files_dir_path);
-
-		// directory open
-		if (!(files_dir = opendir(files_dir_path))) {
-			printf("%s ディレクトリが存在しません。\n作成してもよろしいですか?(y/n)\n", files_dir_path);
-			scanf("%c", &user_input_y_or_n);
-			getchar();	// 標準入力を空にする
-			exit(EXIT_FAILURE);
-		}
 
 	} else {
 		err(EXIT_FAILURE, "%s", "fgets");
@@ -164,6 +146,7 @@ int main(int argc,char** argv)
 				answer_and_question_s[cnt1].answer[cnt2] = '\0';
 				break;
 			}
+
 			if(feof(reading_fp)) break; 
 
 		}
@@ -181,13 +164,13 @@ int main(int argc,char** argv)
 		}
 	}
 
-	
+	fclose(reading_fp);
+
 	for (;;) {
 		printf("出題数：%d\n", question_max);
 		printf("全問出題しますか?(y/n)");
 		scanf("%c", &user_input_y_or_n);
 		getchar();	// 標準入力を空にする
-
 		printf("\n");
 
 		if ('y' == user_input_y_or_n) {
@@ -269,6 +252,5 @@ int main(int argc,char** argv)
 		}
 	}
 
-	fclose(reading_fp);
 	exit(EXIT_SUCCESS);
 };
