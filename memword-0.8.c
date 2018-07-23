@@ -37,11 +37,9 @@ int main(int argc,char** argv)
 	DIR *files_dir;					// Files ディレクトリ
 	struct dirent *dp;				// ディレクトリのデータを扱う構造体
 	FILE *reading_fp;				// 出題ファイルを格納
-//	     *cmd_fp;					// コマンドの出力を格納
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体 (後で動的配列確保へ変更)
 	struct answer_and_question answer_and_question_s[1024]; // 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
-//	     os_name[128],				// unameコマンドの結果を格納する、128の数値は適当
 	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
 	     user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
@@ -52,56 +50,39 @@ int main(int argc,char** argv)
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 
 
-	// os識別いるかいらないかわからん(今の仕様だといらない)
-/*	if ((cmd_fp = popen("uname", "r")) == NULL) {
-		err(EXIT_FAILURE, "%s", "uname");
+
+	getcwd(files_dir_path, PATH_MAX);
+	// 文字連結,オーバーフロー時のエラー処理を書くこと
+	strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
+	// directory open
+	files_dir = opendir(files_dir_path);
+	// directory open
+
+	if (!(files_dir = opendir(files_dir_path))) {
+		printf("%s ディレクトリが存在しません。\n", files_dir_path);
+		exit(EXIT_SUCCESS);
 	}
-*/
 
-//	if (fgets(os_name, sizeof(os_name), cmd_fp) != NULL) {
-		// os が Linux だった場合
-//		if (!strcmp("Linux\n", os_name)){
-		getcwd(files_dir_path, PATH_MAX);
-		// 文字連結,オーバーフロー時のエラー処理を書くこと
-		strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
-		// directory open
-		files_dir = opendir(files_dir_path);
-		// directory open
+	// 出題ファイルが格納されているディレクトリまで移動
+	chdir(files_dir_path);
 
-			if (!(files_dir = opendir(files_dir_path))) {
-				printf("%s ディレクトリが存在しません。\n", files_dir_path);
-				exit(EXIT_SUCCESS);
-			}
-
-		// 出題ファイルが格納されているディレクトリまで移動
-		chdir(files_dir_path);
-
-			for (dp = readdir(files_dir), cnt = 0; dp != NULL; dp = readdir(files_dir)){
-				/*	. と .. は一覧に代入しない	*/
-				if ((!strcmp(dp->d_name,".")) || (!strcmp(dp->d_name,".."))) {
-					continue;
-				}
-
-				filelist_s[cnt].file_number = cnt + 1;
-				strcpy(filelist_s[cnt].file_name, dp->d_name);
-				cnt++;
-			}
-
-			if (0 == cnt) {
-				printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
-				exit(EXIT_SUCCESS);
-			};
-
-/*		} else {
-			err(EXIT_FAILURE, "%s", "uname unknoun");
+	for (dp = readdir(files_dir), cnt = 0; dp != NULL; dp = readdir(files_dir)){
+		/*	. と .. は一覧に代入しない	*/
+		if ((!strcmp(dp->d_name,".")) || (!strcmp(dp->d_name,".."))) {
+			continue;
 		}
-*/
-		printf("%s\n", files_dir_path);
 
-/*	} else {
-		err(EXIT_FAILURE, "%s", "fgets");
+		filelist_s[cnt].file_number = cnt + 1;
+		strcpy(filelist_s[cnt].file_name, dp->d_name);
+		cnt++;
 	}
-*/
+
+	if (0 == cnt) {
+		printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
+		exit(EXIT_SUCCESS);
+	};
+
+	printf("%s\n", files_dir_path);
 
 	number_of_files = cnt;		// 出題ファイルの量を代入
 
