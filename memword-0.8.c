@@ -79,7 +79,7 @@ int main(int argc,char** argv)
 
 	if (0 == cnt) {
 		printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
-		exit(EXIT_SUCCESS);
+		exit(EXIT_FAILURE);
 	};
 
 	printf("%s\n", files_dir_path);
@@ -172,7 +172,7 @@ int main(int argc,char** argv)
 
 				/*	入力エラーチェック	*/
 				if (user_input_num > question_max) {
-					printf("\n実際の問題の量以上の数値が入力されました。\n");
+					printf("\n実際の問題の量以上かそれ以下の数値が入力されました。\n");
 					printf("A number greater than the actual number of file was entered.\n");
 					getchar();
 				} else if (0 >= user_input_num) {
