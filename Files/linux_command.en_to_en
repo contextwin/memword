@@ -1,3 +1,4 @@
+man	an interface to the on-line reference manuals.
 bash	GNU Bourne-Again SHell.
 cat	concatenate files and print on the standard output.
 mkdir	make directories.
@@ -21,7 +22,7 @@ ssh	OpenSSH SSH client (remote login program).
 dd	convert and copy a file.
 dig	DNS lookup utility.
 arp	Linux ARP kernel module.
-man	user interface to the TELNET protocol.
+telnet	user interface to the TELNET protocol.
 kill	send a signal to a process.
 ftp	Internet file transfer program.
 more	file perusal filter for crt viewing.
