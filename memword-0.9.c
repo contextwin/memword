@@ -35,8 +35,8 @@ struct answer_and_question {
 int main(int argc,char** argv)
 {
 	DIR *files_dir;					// Files ディレクトリ
-	struct dirent *dp;				// ディレクトリのデータを扱う構造体
 	FILE *reading_fp;				// 出題ファイルを格納
+	struct dirent *dp;				// ディレクトリのデータを扱う構造体
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体 (後で動的配列確保へ変更)
 	struct answer_and_question answer_and_question_s[1024]; // 出題番号,解答,問題,の構造体,後で動的配列確保へ変更
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
