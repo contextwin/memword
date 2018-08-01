@@ -38,7 +38,7 @@ int main(int argc,char** argv)
 {
 	DIR *files_dir;					// Files ディレクトリ
 	FILE *reading_fp;				// 出題ファイルを格納
-	struct dirent *dp;				// ディレクトリのデータを扱う構造体
+	struct dirent *files_dp;				// ディレクトリのデータを扱う構造体
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体
 	struct answer_and_question answer_and_question_s[1024], // 出題番号,解答,問題,の構造体
 		answer_and_question_tmp;		// sort用
@@ -67,16 +67,18 @@ int main(int argc,char** argv)
 		// 出題ファイルが格納されているディレクトリまで移動(エラー処理書く)
 		chdir(files_dir_path);
 
-		for (dp = readdir(files_dir), cnt = 0; dp != NULL; dp = readdir(files_dir)){
+		for (files_dp = readdir(files_dir), cnt = 0; files_dp != NULL; files_dp = readdir(files_dir)){
 			/*	. と .. は一覧に代入しない	*/
-			if ((!strcmp(dp->d_name,".")) || (!strcmp(dp->d_name,".."))) {
+			if ((!strcmp(files_dp->d_name,".")) || (!strcmp(files_dp->d_name,".."))) {
 				continue;
 			}
 
 			filelist_s[cnt].file_number = cnt + 1;
-			strcpy(filelist_s[cnt].file_name, dp->d_name);
+			strcpy(filelist_s[cnt].file_name, files_dp->d_name);
 			cnt++;
 		}
+
+		closedir(files_dir);
 
 		if (0 == cnt) {
 			printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
@@ -106,7 +108,8 @@ int main(int argc,char** argv)
 			if (user_input_num > number_of_files) {
 				printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
 				printf("A number greater than the actual number of file was entered.\n");
-				getchar();
+			} else if (0 == user_input_num) {
+				printf("\n[  0]は存在しません。1以上の数値を入力して下さい。 \n");
 			} else {
 				break;
 			}
@@ -158,6 +161,7 @@ int main(int argc,char** argv)
 					}
 				}
 
+				fclose(reading_fp);
 				break;
 
 			} else if (2 == user_input_num) {
@@ -192,6 +196,8 @@ int main(int argc,char** argv)
 					}
 				}
 
+				fclose(reading_fp);
+
 				for (cnt1 = 0; cnt1 < (question_max - 1); cnt1++) {
 					for (cnt2 = 1; cnt2 < (question_max - 2); cnt2++) {
 						if (answer_and_question_s[cnt1].rand_key < answer_and_question_s[cnt1 + cnt2].rand_key) {
@@ -209,7 +215,6 @@ int main(int argc,char** argv)
 			}
 		}
 
-		fclose(reading_fp);
 
 		for (;;) {
 			printf("出題数：%d\n", question_max);
@@ -235,7 +240,8 @@ int main(int argc,char** argv)
 					if (user_input_num > question_max) {
 						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
 						printf("A number greater than the actual number of file was entered.\n");
-						getchar();
+					} else if (0 == user_input_num) {
+						printf("\n0問目は存在しません。1以上の数値を入力して下さい。 \n");
 					} else {
 						break;
 					}
@@ -253,11 +259,9 @@ int main(int argc,char** argv)
 					if (number_of_end_question > question_max) {
 						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
 						printf("A number greater than the actual number of file was entered.\n");
-						getchar();
 					} else if (number_of_start_question > number_of_end_question) {
 						printf("\n出題開始行番号より小さい数値が入力されました。\n");
 						printf("A number smaller than thaline number at which the question is to be stated has been entered.\n");
-						getchar();
 					} else {
 						break;
 					}
