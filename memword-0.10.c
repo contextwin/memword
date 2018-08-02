@@ -18,8 +18,9 @@
 
 
 #define FILES_DIR_NAME	"/Files/"	// 出題ファイル格納ディレクトリ
-#define FILES_MAX 256			// 取り扱う出題ファイル数の最大
-#define STRINGS_MAX 1024		// 一つの文字列の最大
+#define FILES_MAX	256			// 取り扱う出題ファイル数の最大
+#define STRINGS_MAX	1024		// 一つの文字列の最大
+#define QUESTION_MAX	2000		// 一つのファイルの最大出題数
 
 struct filelist_struct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
@@ -40,7 +41,7 @@ int main(int argc,char** argv)
 	FILE *reading_fp;				// 出題ファイルを格納
 	struct dirent *files_dp;				// ディレクトリのデータを扱う構造体
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体
-	struct answer_and_question answer_and_question_s[1024], // 出題番号,解答,問題,の構造体
+	struct answer_and_question answer_and_question_s[QUESTION_MAX], // 出題番号,解答,問題,の構造体
 		answer_and_question_tmp;		// sort用
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
 	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
@@ -230,40 +231,63 @@ int main(int argc,char** argv)
 
 			} else if ('n' == user_input_y_or_n) {
 
-				for(;;){
-					printf("出題数：%d\n", question_max);
-					printf("何問目から出題しますか?\n数値を入力して下さい:");
-					scanf("%hd", &user_input_num);
-					getchar();	// 標準入力を空にする
+				if (1 == user_input_num) {
+					for(;;){
+						printf("出題数：%d\n", question_max);
+						printf("何問目から出題しますか?\n数値を入力して下さい:");
+						scanf("%hd", &user_input_num);
+						getchar();	// 標準入力を空にする
 
-					/*	入力エラーチェック	*/
-					if (user_input_num > question_max) {
-						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
-						printf("A number greater than the actual number of file was entered.\n");
-					} else if (0 == user_input_num) {
-						printf("\n0問目は存在しません。1以上の数値を入力して下さい。 \n");
-					} else {
-						break;
+						/*	入力エラーチェック	*/
+						if (user_input_num > question_max) {
+							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
+							printf("A number greater than the actual number of file was entered.\n");
+						} else if (0 == user_input_num) {
+							printf("\n0問目は存在しません。1以上の数値を入力して下さい。 \n");
+						} else {
+							break;
+						}
 					}
-				}
 
-				number_of_start_question = (user_input_num - 1);
+					number_of_start_question = (user_input_num - 1);
 
-				for (;;) {
-					printf("出題数：%d\n", question_max);
-					printf("何問目まで出題しますか?\n数値を入力して下さい:");
-					scanf("%hd", &number_of_end_question);
-					getchar();	// 標準入力を空にする
+					for (;;) {
+						printf("出題数：%d\n", question_max);
+						printf("何問目まで出題しますか?\n数値を入力して下さい:");
+						scanf("%hd", &number_of_end_question);
+						getchar();	// 標準入力を空にする
 	
-					/*	入力エラーチェック	*/
-					if (number_of_end_question > question_max) {
-						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
-						printf("A number greater than the actual number of file was entered.\n");
-					} else if (number_of_start_question > number_of_end_question) {
-						printf("\n出題開始行番号より小さい数値が入力されました。\n");
-						printf("A number smaller than thaline number at which the question is to be stated has been entered.\n");
-					} else {
-						break;
+						/*	入力エラーチェック	*/
+						if (number_of_end_question > question_max) {
+							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
+							printf("A number greater than the actual number of file was entered.\n");
+						} else if (number_of_start_question > number_of_end_question) {
+							printf("\n出題開始行番号より小さい数値が入力されました。\n");
+							printf("A number smaller than thaline number at which the question is to be stated has been entered.\n");
+						} else {
+							break;
+						}
+					}
+				} else if (2 == user_input_num) {
+
+					number_of_start_question = 0;
+
+					for (;;) {
+						printf("全出題数：%d\n", question_max);
+                                                printf("何問出題しますか?\n数値を入力して下さい:");
+                                                scanf("%hd", &number_of_end_question);
+                                                getchar();      // 標準入力を空にする
+
+                                                /*      入力エラーチェック      */
+                                                if (number_of_end_question > question_max) {
+                                                        printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
+                                                        printf("A number greater than the actual number of file was entered.\n");
+                                                } else if (number_of_start_question > number_of_end_question) {
+                                                        printf("\n出題開始行番号より小さい数値が入力されました。\n");
+                                                        printf("A number smaller than thaline number at which the question is to be stated has been entered.\n");
+                                                } else {
+                                                        break;
+                                                }
 					}
 				}
 
@@ -293,11 +317,11 @@ int main(int argc,char** argv)
 			}
 		}
 
-		printf("出題が終わりました。プログラムを終了しますか?(y/n)");
-		scanf("%c", &user_input_y_or_n);
-		getchar();		// 標準入力を空にする
-
 		for (;;) {
+			printf("出題が終わりました。プログラムを終了しますか?(y/n)");
+			scanf("%c", &user_input_y_or_n);
+			getchar();		// 標準入力を空にする
+
 			if ('y' == user_input_y_or_n) {
 				break;
 			} else if ('n' == user_input_y_or_n) {
