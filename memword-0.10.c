@@ -169,42 +169,42 @@ int main(int argc,char** argv)
 				srand((unsigned)time(NULL));
 				/*	解答と、出題を抽出	*/
 				for (cnt1 = 0; !feof(reading_fp); cnt1++) {
-					answer_and_question_s[cnt1].number = cnt1 + 1;
-					answer_and_question_s[cnt1].rand_key = rand();
 		
 					for (cnt2 = 0 ;; cnt2++) {
 						answer_and_question_s[cnt1].answer[cnt2] = getc(reading_fp);
+						if (feof(reading_fp)) break; 
 
 						if (answer_and_question_s[cnt1].answer[cnt2] == '\t') {
 							answer_and_question_s[cnt1].answer[cnt2] = '\0';
 							break;
 						}
-
-						if (feof(reading_fp)) break; 
-
 					}
 
 					for (cnt2 = 0; answer_and_question_s[cnt1].question[cnt2] != '\n'; cnt2++) {
 						answer_and_question_s[cnt1].question[cnt2] = getc(reading_fp);
+						if (feof(reading_fp)) break; 
 
 						if (answer_and_question_s[cnt1].question[cnt2] == '\n') {
 							answer_and_question_s[cnt1].question[cnt2] = '\0';
 							question_max++;			// 出題数を数える
 							break;
 						}
-
-						if (feof(reading_fp)) break;
 					}
+
+					if (feof(reading_fp)) break; 
+
+					answer_and_question_s[cnt1].number = cnt1 + 1;
+					answer_and_question_s[cnt1].rand_key = rand();
 				}
 
 				fclose(reading_fp);
 
-				for (cnt1 = 0; cnt1 < (question_max - 1); cnt1++) {
-					for (cnt2 = 1; cnt2 < (question_max - 2); cnt2++) {
+				for (cnt1 = 0; cnt1 < question_max; cnt1++) {
+					for (cnt2 = 0; (cnt1 + cnt2) < question_max; cnt2++) {
 						if (answer_and_question_s[cnt1].rand_key < answer_and_question_s[cnt1 + cnt2].rand_key) {
 							answer_and_question_tmp = answer_and_question_s[cnt1];
-							answer_and_question_s[cnt1] = answer_and_question_s[cnt + cnt2];
-							answer_and_question_s[cnt + cnt2] = answer_and_question_tmp;
+							answer_and_question_s[cnt1] = answer_and_question_s[cnt1 + cnt2];
+							answer_and_question_s[cnt1 + cnt2] = answer_and_question_tmp;
 						}
 					}
 				}
@@ -252,6 +252,7 @@ int main(int argc,char** argv)
 					number_of_start_question = (user_input_num - 1);
 
 					for (;;) {
+						printf("\n出題開始行：%d\n", user_input_num);
 						printf("出題数：%d\n", question_max);
 						printf("何問目まで出題しますか?\n数値を入力して下さい:");
 						scanf("%hd", &number_of_end_question);
@@ -265,9 +266,11 @@ int main(int argc,char** argv)
 							printf("\n出題開始行番号より小さい数値が入力されました。\n");
 							printf("A number smaller than thaline number at which the question is to be stated has been entered.\n");
 						} else {
+							printf("\n");
 							break;
 						}
 					}
+				/*	random		*/
 				} else if (2 == user_input_num) {
 
 					number_of_start_question = 0;
@@ -297,7 +300,6 @@ int main(int argc,char** argv)
 				printf("y(yes) か n(no) を入力して下さい。\n\n");
 			}
 		}
-
 
 		/*	出題	*/
 		for (cnt = number_of_start_question, cnt_of_question = 1; cnt < number_of_end_question; cnt++, cnt_of_question++) {
