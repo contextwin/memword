@@ -14,13 +14,14 @@
 			*/
 #include <stdlib.h>
 #include <time.h>
-#include <err.h>
 
 
 #define FILES_DIR_NAME	"/Files/"	// 出題ファイル格納ディレクトリ
 #define FILES_MAX	256			// 取り扱う出題ファイル数の最大
 #define STRINGS_MAX	1024		// 一つの文字列の最大
 #define QUESTION_MAX	2000		// 一つのファイルの最大出題数
+#define	SUCCESS		0
+#define ERROR		1
 
 struct filelist_struct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
@@ -34,6 +35,12 @@ struct answer_and_question {
 	char question[STRINGS_MAX];
 };
 	
+void scanf_and_errorcheck(const char *format, const void *variable_p) {
+	if(EOF == scanf(format, variable_p)) {
+		printf("ユーザーからの入力の受取に失敗しました。\n");
+		exit(ERROR);
+	}
+}
 
 int main(int argc,char** argv)
 {
@@ -53,8 +60,11 @@ int main(int argc,char** argv)
 		       number_of_end_question = 0;		// 最後の出題の行番号
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 
+	if (NULL == getcwd(files_dir_path, PATH_MAX)) {
+		printf("カレントディレクトリの取得に失敗しました。\n");
+		exit(ERROR);
+	}
 
-	getcwd(files_dir_path, PATH_MAX);
 	// 文字連結,オーバーフロー時のエラー処理を書くこと
 	strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
 	// directory open
@@ -62,11 +72,14 @@ int main(int argc,char** argv)
 	// directory open
 	if (!(files_dir = opendir(files_dir_path))) {
 		printf("%s ディレクトリが存在しません。\n", files_dir_path);
-		exit(EXIT_SUCCESS);
+		exit(ERROR);
 	}
 
 		// 出題ファイルが格納されているディレクトリまで移動(エラー処理書く)
-		chdir(files_dir_path);
+		if ((-1) == chdir(files_dir_path)) {
+			printf("%s ディレクトリへの移動に失敗しました。\n", files_dir_path);
+			exit(ERROR);
+		};
 
 		for (files_dp = readdir(files_dir), cnt = 0; files_dp != NULL; files_dp = readdir(files_dir)){
 			/*	. と .. は一覧に代入しない	*/
@@ -83,7 +96,7 @@ int main(int argc,char** argv)
 
 		if (0 == cnt) {
 			printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
-			exit(EXIT_FAILURE);
+			exit(ERROR);
 		};
 
 		printf("%s\n", files_dir_path);
@@ -101,7 +114,7 @@ int main(int argc,char** argv)
 			}
 
 			printf(":");
-			scanf("%hd", &user_input_num);		// 後で最適かどうか調べる
+			scanf_and_errorcheck("%hd", &user_input_num);		// 後で最適かどうか調べる
 			getchar();				// 標準入力を空にする
 			printf("\n");
 
@@ -119,7 +132,7 @@ int main(int argc,char** argv)
 		if ((reading_fp = fopen(filelist_s[user_input_num - 1].file_name, "r")) == NULL) {
 			printf("ファイルの読み込みに失敗しました。\n");
 			printf("file open error.\n");
-			exit(EXIT_FAILURE);
+			exit(ERROR);
 		}
 
 		user_input_num = 0;
@@ -130,7 +143,7 @@ int main(int argc,char** argv)
 			printf("[  2] ランダムに出題する。\n");
 //	printf("[  3] 解答の文字数が少ない順に出題する。\n");
 			printf(":");
-			scanf("%hu", &user_input_num);
+			scanf_and_errorcheck("%hu", &user_input_num);
 			getchar();	// 標準入力を空にする
 			printf("\n");
 
@@ -222,7 +235,7 @@ int main(int argc,char** argv)
 		for (;;) {
 			printf("出題数：%d\n", question_max);
 			printf("全問出題しますか?(y/n)");
-			scanf("%c", &user_input_y_or_n);
+			scanf_and_errorcheck("%c", &user_input_y_or_n);
 			getchar();	// 標準入力を空にする
 			printf("\n");
 
@@ -237,7 +250,7 @@ int main(int argc,char** argv)
 					for(;;){
 						printf("出題数：%d\n", question_max);
 						printf("何問目から出題しますか?\n数値を入力して下さい:");
-						scanf("%hd", &user_input_num);
+						scanf_and_errorcheck("%hd", &user_input_num);
 						getchar();	// 標準入力を空にする
 
 						/*	入力エラーチェック	*/
@@ -257,7 +270,7 @@ int main(int argc,char** argv)
 						printf("\n出題開始行：%d\n", user_input_num);
 						printf("出題数：%d\n", question_max);
 						printf("何問目まで出題しますか?\n数値を入力して下さい:");
-						scanf("%hd", &number_of_end_question);
+						scanf_and_errorcheck("%hd", &number_of_end_question);
 						getchar();	// 標準入力を空にする
 	
 						/*	入力エラーチェック	*/
@@ -280,7 +293,7 @@ int main(int argc,char** argv)
 					for (;;) {
 						printf("全出題数：%d\n", question_max);
                                                 printf("何問出題しますか?\n数値を入力して下さい:");
-                                                scanf("%hd", &number_of_end_question);
+                                                scanf_and_errorcheck("%hd", &number_of_end_question);
                                                 getchar();      // 標準入力を空にする
 
                                                 /*      入力エラーチェック      */
@@ -307,7 +320,7 @@ int main(int argc,char** argv)
 		for (cnt = number_of_start_question, cnt_of_question = 1; cnt < number_of_end_question; cnt++, cnt_of_question++) {
 			printf("question\t: #%hhu\nline number\t: #%lu\n", cnt_of_question, answer_and_question_s[cnt].number);
 			printf("Q: %s\n", answer_and_question_s[cnt].question);
-			scanf("%[^\t\n]", user_input_answer);	// 空白も入力できるようにする
+			scanf_and_errorcheck("%[^\t\n]", user_input_answer);	// 空白も入力できるようにする
 			getchar();		// 標準入力を空にする
 
 			if (!strcmp(answer_and_question_s[cnt].answer, user_input_answer)) {
@@ -323,7 +336,7 @@ int main(int argc,char** argv)
 
 		for (;;) {
 			printf("出題が終わりました。プログラムを終了しますか?(y/n)");
-			scanf("%c", &user_input_y_or_n);
+			scanf_and_errorcheck("%c", &user_input_y_or_n);
 			getchar();		// 標準入力を空にする
 
 			if ('y' == user_input_y_or_n) {
@@ -339,5 +352,5 @@ int main(int argc,char** argv)
 		if ('y' == user_input_y_or_n) break;
 	}
 
-	exit(EXIT_SUCCESS);
+	exit(SUCCESS);
 };
