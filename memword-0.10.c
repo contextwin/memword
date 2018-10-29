@@ -122,6 +122,8 @@ int main(int argc,char** argv)
 			exit(EXIT_FAILURE);
 		}
 
+		user_input_num = NULL;
+
 		for (;;) {
 			printf("出題の順番を数値で入力して下さい。\n");
 			printf("[  1] 一行目から順番に出題する。\n");
