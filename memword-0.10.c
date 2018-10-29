@@ -20,7 +20,7 @@
 #define FILES_MAX	256			// 取り扱う出題ファイル数の最大
 #define STRINGS_MAX	1024		// 一つの文字列の最大
 #define QUESTION_MAX	2000		// 一つのファイルの最大出題数
-#define	SUCCESS		0
+#define SUCCESS		0
 #define ERROR		1
 
 struct filelist_struct {		// 番号とファイル名の組み合わせ
