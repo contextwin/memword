@@ -113,8 +113,6 @@ int main(int argc,char** argv)
 			exit(ERROR);
 		};
 
-		printf("%s\n", files_dir_path);
-
 		number_of_files = cnt;		// 出題ファイルの量を代入
 
 	for (;;) {
