@@ -1,5 +1,5 @@
 #include <stdio.h>	
-#include <string.h>	// strncat() cert cで推奨か調べる, strcmp(), strcpy()
+#include <string.h>	
 #include <unistd.h>	
 #include <dirent.h>	// DIR, struct dirent
 			/* struct dirent {
@@ -27,8 +27,6 @@
 struct filelist_struct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
 	char file_name[NAME_MAX];
-
-
 };
 
 struct answer_and_question {
@@ -43,7 +41,7 @@ void scanf_and_errorcheck(const char *format, const void *variable_p) {
 		printf("ユーザーからの入力の受取に失敗しました。\n");
 		exit(ERROR);
 	}
-}
+};
 
 int main(int argc,char** argv)
 {
