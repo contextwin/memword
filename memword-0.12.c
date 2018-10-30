@@ -1,5 +1,4 @@
 #include <stdio.h>	
-#include <limits.h>	// PATH_MAX(4096) NAME_MAX(255)	
 #include <string.h>	// strncat() cert cで推奨か調べる, strcmp(), strcpy()
 #include <unistd.h>	
 #include <dirent.h>	// DIR, struct dirent
@@ -16,6 +15,8 @@
 #include <time.h>
 
 
+#define PATH_MAX	4096
+#define	NAME_MAX	255
 #define FILES_DIR_NAME	"/Files/"	// 出題ファイル格納ディレクトリ
 #define FILES_MAX	256			// 取り扱う出題ファイル数の最大
 #define STRINGS_MAX	1024		// 一つの文字列の最大
