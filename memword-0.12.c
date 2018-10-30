@@ -27,6 +27,8 @@
 struct filelist_struct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
 	char file_name[NAME_MAX];
+
+
 };
 
 struct answer_and_question {
@@ -46,19 +48,27 @@ void scanf_and_errorcheck(const char *format, const void *variable_p) {
 int main(int argc,char** argv)
 {
 	DIR *files_dir;					// Files ディレクトリ
+
 	FILE *reading_fp;				// 出題ファイルを格納
+
 	struct dirent *files_dp;				// ディレクトリのデータを扱う構造体
+
 	struct filelist_struct filelist_s[FILES_MAX];	// 出題ファイル一覧の構造体
+
 	struct answer_and_question answer_and_question_s[QUESTION_MAX], // 出題番号,解答,問題,の構造体
 		answer_and_question_tmp;		// sort用
+
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
 	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
 	     user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
+
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
 		      number_of_files;			// 出題ファイル数
-	unsigned short user_input_num,			// ユーザーの入力した数値
+
+	unsigned short user_input_num = 0,			// ユーザーの入力した数値
 		       number_of_start_question = 0,	// 開始時の出題の行番号
 		       number_of_end_question = 0;		// 最後の出題の行番号
+
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 
 	if (NULL == getcwd(files_dir_path, PATH_MAX)) {
@@ -66,8 +76,13 @@ int main(int argc,char** argv)
 		exit(ERROR);
 	}
 
-	// 文字連結,オーバーフロー時のエラー処理を書くこと
-	strncat(files_dir_path, FILES_DIR_NAME, PATH_MAX);
+	if (PATH_MAX < ((sizeof(files_dir_path) / sizeof(char))) + ((sizeof(FILES_DIR_NAME) / sizeof(char)))) {
+		printf("出題ファイルまでのパスの長さが PATE_MAX(4096) 以上です。");
+		exit(ERROR);
+	} else {
+		strcat(files_dir_path, FILES_DIR_NAME);
+	}
+
 	// directory open
 	files_dir = opendir(files_dir_path);
 	// directory open
