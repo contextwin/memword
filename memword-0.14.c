@@ -22,7 +22,7 @@
 #define QUESTION_MAX	2000		// 一つのファイルの最大出題数
 #define SUCCESS		0
 #define ERROR		1
-#define EDITER		"vi "
+#define EDITOR		"vi "
 /*	struct	*/
 struct filelist_struct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
@@ -53,7 +53,7 @@ int main(int argc,char** argv)
 	char files_dir_path[PATH_MAX], 			// 出題ファイルのパス
 	     user_input_y_or_n,			// ユーザ入力の y か n を格納する
 	     user_input_answer[STRINGS_MAX],		// ユーザの解答を格納
-	     command_line_str[strlen(EDITER) + NAME_MAX];	// vi起動用
+	     command_line_str[strlen(EDITOR) + NAME_MAX];	// vi起動用
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
 		      number_of_files;			// 出題ファイル数
 	unsigned short user_input_num = 0,			// ユーザーの入力した数値
@@ -61,7 +61,7 @@ int main(int argc,char** argv)
 		       number_of_end_question = 0;		// 最後の出題の行番号
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 	/*	method		*/
-	strcat(command_line_str, EDITER);
+	strcat(command_line_str, EDITOR);
 	if (NULL == getcwd(files_dir_path, PATH_MAX)) {
 		printf("カレントディレクトリの取得に失敗しました。\n");
 		exit(ERROR);
@@ -72,10 +72,11 @@ int main(int argc,char** argv)
 	} else {
 		strcat(files_dir_path, FILES_DIR_NAME);
 	}
-	if (!(files_dir = opendir(files_dir_path))) {
-		printf("%s ディレクトリが存在しません。\n", files_dir_path);
-		exit(ERROR);
-	}
+	for (;;) {
+		if (!(files_dir = opendir(files_dir_path))) {
+			printf("%s ディレクトリが存在しません。\n", files_dir_path);
+			exit(ERROR);
+		}
 		// 出題ファイルが格納されているディレクトリまで移動(エラー処理書く)
 		if ((-1) == chdir(files_dir_path)) {
 			printf("%s ディレクトリへの移動に失敗しました。\n", files_dir_path);
@@ -96,7 +97,6 @@ int main(int argc,char** argv)
 			exit(ERROR);
 		};
 		number_of_files = cnt;		// 出題ファイルの量を代入
-	for (;;) {
 		printf("memword start menu. 数値を入力して下さい。\n");
 		printf("[  1] 暗記を始める。\n");
 		printf("[  2] 出題ファイルを編集する。\n");
@@ -133,32 +133,46 @@ int main(int argc,char** argv)
 				exit(ERROR);
 			}
 		} else if (2 == user_input_num) {
-			for (;;) {
-				printf("編集するファイルを数値で入力してください。(Please select a file and enter anumerical value)\n");
-				/*	出題ファイル番号と出題ファイル名を出力	*/
-				for (cnt = 0;cnt < number_of_files; cnt++) {
-					printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
+			printf("作業内容を数値で選択してください。\n");
+			printf("[  1] 既存のファイルを編集する。\n");
+			printf("[  2] 新規ファイルを作成する。\n");
+			printf(":");
+			scanf_and_errorcheck("%hd", &user_input_num);
+			getchar();				// 標準入力を空にする
+			printf("\n");
+			if (1 == user_input_num) {
+				for (;;) {
+					printf("編集するファイルを数値で入力してください。(Please select a file and enter anumerical value)\n");
+					/*	出題ファイル番号と出題ファイル名を出力	*/
+					for (cnt = 0;cnt < number_of_files; cnt++) {
+						printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
+					}
+					printf(":");
+					scanf_and_errorcheck("%hd", &user_input_num);
+					getchar();				// 標準入力を空にする
+					printf("\n");
+					/*	入力エラーチェック	*/
+					if (user_input_num > number_of_files) {
+						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
+						printf("A number greater than the actual number of file was entered.\n");
+					} else if (0 == user_input_num) {
+						printf("\n[  0]は存在しません。1以上の数値を入力して下さい。 \n");
+					} else {
+						break;
+					}
 				}
-				printf(":");
-				scanf_and_errorcheck("%hd", &user_input_num);
-				getchar();				// 標準入力を空にする
-				printf("\n");
-				/*	入力エラーチェック	*/
-				if (user_input_num > number_of_files) {
-					printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
-					printf("A number greater than the actual number of file was entered.\n");
-				} else if (0 == user_input_num) {
-					printf("\n[  0]は存在しません。1以上の数値を入力して下さい。 \n");
-				} else {
-					break;
-				}
+				strcat(command_line_str, filelist_s[user_input_num - 1].file_name);
+				if (-1 == system(command_line_str)) {
+					printf("shell が利用可能な状態では無いです。\n");
+				};
+				strcpy(command_line_str, EDITOR);
+			} else if (2 == user_input_num) {
+				if (-1 == system(command_line_str)) {
+					printf("shell が利用可能な状態では無いです。\n");
+				};
+			} else {
+				printf("1か2以外が入力されました。\n");
 			}
-			printf("%s\n", filelist_s[user_input_num - 1].file_name);
-			strcat(command_line_str, filelist_s[user_input_num - 1].file_name);
-			if (-1 == system(command_line_str)) {
-				printf("shell が利用可能な状態では無いです。\n");
-			};
-			strcpy(command_line_str, EDITER);
 			continue;
 		} else {
 			printf("1か2以外が入力されました。\n");
