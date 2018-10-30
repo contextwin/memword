@@ -74,16 +74,13 @@ int main(int argc,char** argv)
 		exit(ERROR);
 	}
 
-	if (PATH_MAX < ((sizeof(files_dir_path) / sizeof(char))) + ((sizeof(FILES_DIR_NAME) / sizeof(char)))) {
+	if (PATH_MAX < (strlen(files_dir_path) + strlen(FILES_DIR_NAME))) {
 		printf("出題ファイルまでのパスの長さが PATE_MAX(4096) 以上です。");
 		exit(ERROR);
 	} else {
 		strcat(files_dir_path, FILES_DIR_NAME);
 	}
 
-	// directory open
-	files_dir = opendir(files_dir_path);
-	// directory open
 	if (!(files_dir = opendir(files_dir_path))) {
 		printf("%s ディレクトリが存在しません。\n", files_dir_path);
 		exit(ERROR);
