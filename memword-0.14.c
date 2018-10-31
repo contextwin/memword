@@ -55,9 +55,9 @@ int main(int argc,char** argv)
 	     user_input_answer[STRINGS_MAX],		// ユーザの解答を格納
 	     command_line_str[strlen(EDITOR) + NAME_MAX];	// vi起動用
 	unsigned char cnt, cnt_of_question, cnt1, cnt2, 			// ループ制御用変数
-		      number_of_files;			// 出題ファイル数
-	unsigned short user_input_num = 0,			// ユーザーの入力した数値
-		       number_of_start_question = 0,	// 開始時の出題の行番号
+		      number_of_files,			// 出題ファイル数
+		      user_input_num = 0;		// ユーザーの入力した数
+	unsigned short number_of_start_question = 0,	// 開始時の出題の行番号
 		       number_of_end_question = 0;		// 最後の出題の行番号
 	unsigned int question_max = 0;			// 最大出題数 (あとで sizeof の割り算に変更)
 	/*	method		*/
@@ -107,7 +107,9 @@ int main(int argc,char** argv)
 		if (1 == user_input_num) {
 			/*	出題ファイル選択ループ	*/
 			for (;;) {
+				/*	Select		*/
 				printf("出題ファイルを数値で入力してください。(Please select a file and enter anumerical value)\n");
+				printf("[  0] メインメニューに戻る。\n");
 				/*	出題ファイル番号と出題ファイル名を出力	*/
 				for (cnt = 0;cnt < number_of_files; cnt++) {
 					printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
@@ -120,12 +122,11 @@ int main(int argc,char** argv)
 				if (user_input_num > number_of_files) {
 					printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
 					printf("A number greater than the actual number of file was entered.\n");
-				} else if (0 == user_input_num) {
-					printf("\n[  0]は存在しません。1以上の数値を入力して下さい。 \n");
 				} else {
 					break;
 				}
 			}
+			if (0 == user_input_num) continue;
 			printf("%s\n", filelist_s[user_input_num - 1].file_name);
 			if ((reading_fp = fopen(filelist_s[user_input_num - 1].file_name, "r")) == NULL) {
 				printf("ファイルの読み込みに失敗しました。\n");
@@ -133,45 +134,53 @@ int main(int argc,char** argv)
 				exit(ERROR);
 			}
 		} else if (2 == user_input_num) {
-			printf("作業内容を数値で選択してください。\n");
-			printf("[  1] 既存のファイルを編集する。\n");
-			printf("[  2] 新規ファイルを作成する。\n");
-			printf(":");
-			scanf_and_errorcheck("%hd", &user_input_num);
-			getchar();				// 標準入力を空にする
-			printf("\n");
-			if (1 == user_input_num) {
-				for (;;) {
-					printf("編集するファイルを数値で入力してください。(Please select a file and enter anumerical value)\n");
-					/*	出題ファイル番号と出題ファイル名を出力	*/
-					for (cnt = 0;cnt < number_of_files; cnt++) {
-						printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
+			for(;;) {
+				/*	Select		*/
+				printf("作業内容を数値で選択してください。\n");
+				printf("[  0] メインメニューに戻る。\n");
+				printf("[  1] 既存のファイルを編集する。\n");
+				printf("[  2] 新規ファイルを作成する。\n");
+				printf(":");
+				scanf_and_errorcheck("%hd", &user_input_num);
+				getchar();				// 標準入力を空にする
+				printf("\n");
+				if (1 == user_input_num) {
+					for (;;) {
+						/*	Select		*/
+						printf("編集するファイルを数値で入力してください。(Please select a file and enter anumerical value)\n");
+						/*	出題ファイル番号と出題ファイル名を出力	*/
+						printf("[  0] メインメニューに戻る。\n");
+						for (cnt = 0;cnt < number_of_files; cnt++) {
+							printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
+						}
+						printf(":");
+						scanf_and_errorcheck("%hd", &user_input_num);
+						getchar();				// 標準入力を空にする
+						printf("\n");
+						/*	入力エラーチェック	*/
+						if (user_input_num > number_of_files) {
+							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
+							printf("A number greater than the actual number of file was entered.\n");
+						} else {
+							break;
+						}
 					}
-					printf(":");
-					scanf_and_errorcheck("%hd", &user_input_num);
-					getchar();				// 標準入力を空にする
-					printf("\n");
-					/*	入力エラーチェック	*/
-					if (user_input_num > number_of_files) {
-						printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
-						printf("A number greater than the actual number of file was entered.\n");
+					if (0 == user_input_num) break;
+					strcat(command_line_str, filelist_s[user_input_num - 1].file_name);
+					if (-1 == system(command_line_str)) {
+						printf("shell が利用可能な状態では無いです。\n");
+					};
+					strcpy(command_line_str, EDITOR);
+					} else if (2 == user_input_num) {
+						if (-1 == system(command_line_str)) {
+							printf("shell が利用可能な状態では無いです。\n");
+						};
 					} else if (0 == user_input_num) {
-						printf("\n[  0]は存在しません。1以上の数値を入力して下さい。 \n");
-					} else {
 						break;
-					}
+					} else {
+					printf("1か2以外が入力されました。\n");
+					printf("%d\n", user_input_num);
 				}
-				strcat(command_line_str, filelist_s[user_input_num - 1].file_name);
-				if (-1 == system(command_line_str)) {
-					printf("shell が利用可能な状態では無いです。\n");
-				};
-				strcpy(command_line_str, EDITOR);
-			} else if (2 == user_input_num) {
-				if (-1 == system(command_line_str)) {
-					printf("shell が利用可能な状態では無いです。\n");
-				};
-			} else {
-				printf("1か2以外が入力されました。\n");
 			}
 			continue;
 		} else {
@@ -180,7 +189,9 @@ int main(int argc,char** argv)
 		}
 		user_input_num = 0;
 		for (;;) {
+			/*	select		*/
 			printf("出題の順番を数値で入力して下さい。\n");
+			printf("[  0] メインメニューに戻る。\n");
 			printf("[  1] 一行目から順番に出題する。\n");
 			printf("[  2] ランダムに出題する。\n");
 //	printf("[  3] 解答の文字数が少ない順に出題する。\n");
@@ -248,11 +259,15 @@ int main(int argc,char** argv)
 					}
 				}
 				break;
+			} else if (0 == user_input_num) {
+				break;
 			} else {
 				printf("1か2以外が入力されました。\n");
 			}
 		}
+		if (0 == user_input_num) continue;
 		for (;;) {
+			/*	Select		*/
 			printf("出題数：%d\n", question_max);
 			printf("全問出題しますか?(y/n)\n");
 			printf(":");
@@ -266,6 +281,7 @@ int main(int argc,char** argv)
 			} else if ('n' == user_input_y_or_n) {
 				if (1 == user_input_num) {
 					for(;;){
+						/*	Select		*/
 						printf("出題数：%d\n", question_max);
 						printf("何問目から出題しますか?\n数値を入力して下さい:");
 						scanf_and_errorcheck("%hd", &user_input_num);
@@ -282,6 +298,7 @@ int main(int argc,char** argv)
 					}
 					number_of_start_question = (user_input_num - 1);
 					for (;;) {
+						/*	Select		*/
 						printf("\n出題開始行：%d\n", user_input_num);
 						printf("出題数：%d\n", question_max);
 						printf("何問目まで出題しますか?\n数値を入力して下さい:");
@@ -303,6 +320,7 @@ int main(int argc,char** argv)
 				} else if (2 == user_input_num) {
 					number_of_start_question = 0;
 					for (;;) {
+						/*	Select		*/
 						printf("全出題数：%d\n", question_max);
                                                 printf("何問出題しますか?\n数値を入力して下さい\n");
 						printf(":");
