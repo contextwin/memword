@@ -199,6 +199,7 @@ int main(int argc,char** argv)
 			printf("[  1] 一行目から順番に出題する。\n");
 			printf("[  2] ランダムに出題する。\n");
 			printf("[  3] 解答の文字数が少ない順に出題する。\n");
+			printf("[  4] 解答の文字数が多い順に出題する。\n");
 			printf(":");
 			scanf_and_errorcheck("%hu", &user_input_num);
 			getchar();	// 標準入力を空にする
@@ -301,6 +302,50 @@ int main(int argc,char** argv)
 					for (cnt1 = 0; (cnt + cnt1) < question_max; cnt1++) {
 						if ((strlen(answer_and_question_s[cnt].answer) == strlen(answer_and_question_s[cnt + cnt1].answer)) &&
 						(answer_and_question_s[cnt].answer[0] > answer_and_question_s[cnt + cnt1].answer[0])) {
+							answer_and_question_tmp = answer_and_question_s[cnt];
+							answer_and_question_s[cnt] = answer_and_question_s[cnt + cnt1];
+							answer_and_question_s[cnt + cnt1] = answer_and_question_tmp;
+						}
+					}
+				}
+				break;
+			/*	descending order	*/
+			} else if (4 == user_input_num) {
+				for (cnt = 0; !feof(reading_fp); cnt++) {
+					for (cnt1 = 0 ;; cnt1++) {
+						answer_and_question_s[cnt].answer[cnt1] = getc(reading_fp);
+						if (feof(reading_fp)) break; 
+						if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
+							answer_and_question_s[cnt].answer[cnt1] = '\0';
+							break;
+						}
+					}
+					for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
+						answer_and_question_s[cnt].question[cnt1] = getc(reading_fp);
+						if (feof(reading_fp)) break; 
+						if (answer_and_question_s[cnt].question[cnt1] == '\n') {
+							answer_and_question_s[cnt].question[cnt1] = '\0';
+							question_max++;			// 出題数を数える
+							break;
+						}
+					}
+					if (feof(reading_fp)) break; 
+					answer_and_question_s[cnt].number = cnt + 1;
+				}
+				fclose(reading_fp);
+				for (cnt = 0; cnt < question_max; cnt++) {
+					for (cnt1 = 0; (cnt + cnt1) < question_max; cnt1++) {
+						if (strlen(answer_and_question_s[cnt].answer) < strlen(answer_and_question_s[cnt + cnt1].answer)) {
+							answer_and_question_tmp = answer_and_question_s[cnt];
+							answer_and_question_s[cnt] = answer_and_question_s[cnt + cnt1];
+							answer_and_question_s[cnt + cnt1] = answer_and_question_tmp;
+						}
+					}
+				}
+				for (cnt = 0; cnt < question_max; cnt++) {
+					for (cnt1 = 0; (cnt + cnt1) < question_max; cnt1++) {
+						if ((strlen(answer_and_question_s[cnt].answer) == strlen(answer_and_question_s[cnt + cnt1].answer)) &&
+						(answer_and_question_s[cnt].answer[0] < answer_and_question_s[cnt + cnt1].answer[0])) {
 							answer_and_question_tmp = answer_and_question_s[cnt];
 							answer_and_question_s[cnt] = answer_and_question_s[cnt + cnt1];
 							answer_and_question_s[cnt + cnt1] = answer_and_question_tmp;
