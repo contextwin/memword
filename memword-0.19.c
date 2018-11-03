@@ -40,6 +40,36 @@ void wait_user_input(const char *format, const void *variable_p) {
 	printf("\n");
 };
 
+unsigned int fp_read_and_split(FILE *fp, struct answer_and_question *answer_and_question_s) {
+
+	unsigned char cnt = 0,
+		      cnt1 = 0;
+
+	unsigned int question_max = 0;
+
+	for (cnt = 0; !feof(fp); cnt++) {
+		answer_and_question_s[cnt].number = cnt + 1;
+		for(cnt1 = 0 ;; cnt1++){
+			answer_and_question_s[cnt].answer[cnt1] = getc(fp);
+			if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
+				answer_and_question_s[cnt].answer[cnt1] = '\0';
+				break;
+			}
+			if (feof(fp)) break; 
+		}
+		for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
+			answer_and_question_s[cnt].question[cnt1] = getc(fp);
+			if (answer_and_question_s[cnt].question[cnt1] == '\n') {
+				answer_and_question_s[cnt].question[cnt1] = '\0';
+				question_max++;
+				break;
+			}
+			if (feof(fp)) break;
+		}
+	}
+	fclose(fp);
+	return question_max;
+}
 
 /*	Main method	*/
 int main(int argc,char** argv)
@@ -57,9 +87,9 @@ int main(int argc,char** argv)
 	     user_input_answer[STRINGS_MAX],			// ユーザの解答を格納
 	     command_line_str[strlen(EDITOR) + NAME_MAX];	// vi起動用
 
-	unsigned char cnt,
-		      cnt1,				// ループ制御用変数
-		      number_of_files,			// 出題ファイル数
+	unsigned char cnt = 0,
+		      cnt1 = 0,				// ループ制御用変数
+		      number_of_files = 0,			// 出題ファイル数
 		      user_input_num = 0;		// ユーザーの入力した数
 
 	unsigned short number_of_start_question = 0,	// 開始時の出題の行番号
@@ -195,30 +225,11 @@ int main(int argc,char** argv)
 			printf("[  2] ランダムに出題する。\n");
 			printf("[  3] 解答の文字数が少ない順に出題する。\n");
 			printf("[  4] 解答の文字数が多い順に出題する。\n");
+
 			wait_user_input("%hu", &user_input_num);
+
 			if (1 == user_input_num) {
-				/*	解答と、出題を抽出	*/
-				for (cnt = 0; !feof(reading_fp); cnt++) {
-					answer_and_question_s[cnt].number = cnt + 1;
-					for(cnt1 = 0 ;; cnt1++){
-						answer_and_question_s[cnt].answer[cnt1] = getc(reading_fp);
-						if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
-							answer_and_question_s[cnt].answer[cnt1] = '\0';
-							break;
-						}
-						if (feof(reading_fp)) break; 
-					}
-					for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
-						answer_and_question_s[cnt].question[cnt1] = getc(reading_fp);
-						if (answer_and_question_s[cnt].question[cnt1] == '\n') {
-							answer_and_question_s[cnt].question[cnt1] = '\0';
-							question_max++;			// 出題数を数える
-							break;
-						}
-						if (feof(reading_fp)) break;
-					}
-				}
-				fclose(reading_fp);
+				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
 				break;
 			/*	random		*/
 			} else if (2 == user_input_num) {
@@ -247,6 +258,7 @@ int main(int argc,char** argv)
 					answer_and_question_s[cnt].rand_key = rand();
 				}
 				fclose(reading_fp);
+
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
 						if (answer_and_question_s[cnt].rand_key < answer_and_question_s[cnt + cnt1].rand_key) {
@@ -257,30 +269,10 @@ int main(int argc,char** argv)
 					}
 				}
 				break;
+
 			/*	Ascending order		*/
 			} else if (3 == user_input_num) {
-				for (cnt = 0; !feof(reading_fp); cnt++) {
-					for (cnt1 = 0 ;; cnt1++) {
-						answer_and_question_s[cnt].answer[cnt1] = getc(reading_fp);
-						if (feof(reading_fp)) break; 
-						if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
-							answer_and_question_s[cnt].answer[cnt1] = '\0';
-							break;
-						}
-					}
-					for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
-						answer_and_question_s[cnt].question[cnt1] = getc(reading_fp);
-						if (feof(reading_fp)) break; 
-						if (answer_and_question_s[cnt].question[cnt1] == '\n') {
-							answer_and_question_s[cnt].question[cnt1] = '\0';
-							question_max++;			// 出題数を数える
-							break;
-						}
-					}
-					if (feof(reading_fp)) break; 
-					answer_and_question_s[cnt].number = cnt + 1;
-				}
-				fclose(reading_fp);
+				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
 						if (strlen(answer_and_question_s[cnt].answer) > strlen(answer_and_question_s[cnt + cnt1].answer)) {
@@ -303,28 +295,8 @@ int main(int argc,char** argv)
 				break;
 			/*	descending order	*/
 			} else if (4 == user_input_num) {
-				for (cnt = 0; !feof(reading_fp); cnt++) {
-					for (cnt1 = 0 ;; cnt1++) {
-						answer_and_question_s[cnt].answer[cnt1] = getc(reading_fp);
-						if (feof(reading_fp)) break; 
-						if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
-							answer_and_question_s[cnt].answer[cnt1] = '\0';
-							break;
-						}
-					}
-					for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
-						answer_and_question_s[cnt].question[cnt1] = getc(reading_fp);
-						if (feof(reading_fp)) break; 
-						if (answer_and_question_s[cnt].question[cnt1] == '\n') {
-							answer_and_question_s[cnt].question[cnt1] = '\0';
-							question_max++;			// 出題数を数える
-							break;
-						}
-					}
-					if (feof(reading_fp)) break; 
-					answer_and_question_s[cnt].number = cnt + 1;
-				}
-				fclose(reading_fp);
+				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
+
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
 						if (strlen(answer_and_question_s[cnt].answer) < strlen(answer_and_question_s[cnt + cnt1].answer)) {
@@ -334,6 +306,7 @@ int main(int argc,char** argv)
 						}
 					}
 				}
+
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
 						if ((strlen(answer_and_question_s[cnt].answer) == strlen(answer_and_question_s[cnt + cnt1].answer)) &&
@@ -345,6 +318,7 @@ int main(int argc,char** argv)
 					}
 				}
 				break;
+
 			} else if (0 == user_input_num) {
 				break;
 			} else {
