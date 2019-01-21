@@ -1,2 +1,2 @@
-memword: memword-0.20.c
-	$(CC) -Wall -O3 -o memword memword-0.20.c
+memword: memword-0.23.c
+	$(CC) -Wall -O3 -o memword memword-0.23.c

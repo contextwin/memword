@@ -12,17 +12,15 @@
 #define FILES_MAX	256		// 取り扱う出題ファイル数の最大
 #define STRINGS_MAX	1024		// 一つの文字列の最大
 #define QUESTION_MAX	2000		// 一つのファイルの最大出題数
-#define SUCCESS		0
-#define ERROR		1
 #define EDITOR		"vi "
 
 /*	struct	*/
-struct filelist_struct {		// 番号とファイル名の組み合わせ
+struct FilelistStruct {		// 番号とファイル名の組み合わせ
 	unsigned char file_number;
 	char file_name[NAME_MAX];
 };
 
-struct answer_and_question {
+struct AnswerAndQuestion {
 	unsigned long	number;
 	unsigned long	rand_key;
 	char answer[STRINGS_MAX];
@@ -30,37 +28,62 @@ struct answer_and_question {
 };
 
 /*	function	*/
-void wait_user_input(const char *format, const void *variable_p) {
+void WaitUserInput(const char *format, const void *variable_p) {
 	printf(":");
 	if(EOF == scanf(format, variable_p)) {
 		printf("ユーザーからの入力の受取に失敗しました。\n");
-		exit(ERROR);
+		exit(EXIT_FAILURE);
 	}
 	getchar();				// 標準入力を空にする
 	printf("\n");
 };
 
-unsigned int fp_read_and_split(FILE *fp, struct answer_and_question *answer_and_question_s) {
+void Question(unsigned short number_of_start_question, unsigned short number_of_end_question, struct AnswerAndQuestion *answer_and_question_s) {
 
-	unsigned char cnt = 0,
-		      cnt1 = 0;
+	unsigned char	cnt1 = 0, cnt2 = 0;
+	char		user_input_answer[STRINGS_MAX];		// ユーザの解答を格納
+
+	for (cnt1 = number_of_start_question, cnt2 = 1; cnt1 < number_of_end_question; cnt1++, cnt2++) {
+
+		printf("question\t: #%hhu\nline number\t: #%lu\n", cnt2, answer_and_question_s[cnt1].number);
+        	printf("Q: %s\n", answer_and_question_s[cnt1].question);
+        	WaitUserInput("%[^\t\n]", user_input_answer);
+
+        	if (!strcmp(answer_and_question_s[cnt1].answer, user_input_answer)) {
+        		printf("correct!!\n");
+                	printf("A: %s\n\n", answer_and_question_s[cnt1].answer);
+        	} else {
+       			printf("miss!!\n");
+        		printf("A: %s\n\n", answer_and_question_s[cnt1].answer);
+                	cnt1--;
+                	cnt2--;
+               }
+	}
+
+
+};
+
+unsigned int FpReadAndSplit(FILE *fp, struct AnswerAndQuestion *answer_and_question_s) {
+
+	unsigned char cnt1 = 0,
+		      cnt2 = 0;
 
 	unsigned int question_max = 0;
 
-	for (cnt = 0; !feof(fp); cnt++) {
-		answer_and_question_s[cnt].number = cnt + 1;
-		for(cnt1 = 0 ;; cnt1++){
-			answer_and_question_s[cnt].answer[cnt1] = getc(fp);
-			if (answer_and_question_s[cnt].answer[cnt1] == '\t') {
-				answer_and_question_s[cnt].answer[cnt1] = '\0';
+	for (cnt1 = 0; !feof(fp); cnt1++) {
+		answer_and_question_s[cnt1].number = cnt1 + 1;
+		for(cnt2 = 0 ;; cnt2++){
+			answer_and_question_s[cnt1].answer[cnt2] = getc(fp);
+			if (answer_and_question_s[cnt1].answer[cnt2] == '\t') {
+				answer_and_question_s[cnt1].answer[cnt2] = '\0';
 				break;
 			}
 			if (feof(fp)) break; 
 		}
-		for (cnt1 = 0; answer_and_question_s[cnt].question[cnt1] != '\n'; cnt1++) {
-			answer_and_question_s[cnt].question[cnt1] = getc(fp);
-			if (answer_and_question_s[cnt].question[cnt1] == '\n') {
-				answer_and_question_s[cnt].question[cnt1] = '\0';
+		for (cnt2 = 0; answer_and_question_s[cnt1].question[cnt2] != '\n'; cnt2++) {
+			answer_and_question_s[cnt1].question[cnt2] = getc(fp);
+			if (answer_and_question_s[cnt1].question[cnt2] == '\n') {
+				answer_and_question_s[cnt1].question[cnt2] = '\0';
 				question_max++;
 				break;
 			}
@@ -78,13 +101,12 @@ int main(int argc,char** argv)
 	DIR *files_dir;						// Files ディレクトリ
 	FILE *reading_fp;					// 出題ファイルを格納
 	struct dirent *files_dp;				// ディレクトリのデータを扱う構造体
-	struct filelist_struct filelist_s[FILES_MAX];		// 出題ファイル一覧の構造体
-	struct answer_and_question answer_and_question_s[QUESTION_MAX], // 出題番号,解答,問題,の構造体
+	struct FilelistStruct filelist_s[FILES_MAX];		// 出題ファイル一覧の構造体
+	struct AnswerAndQuestion answer_and_question_s[QUESTION_MAX], // 出題番号,解答,問題,の構造体
 	       answer_and_question_tmp;				// sort用
 
 	char files_dir_path[PATH_MAX], 				// 出題ファイルのパス
 	     user_input_y_or_n,					// ユーザ入力の y か n を格納する
-	     user_input_answer[STRINGS_MAX],			// ユーザの解答を格納
 	     command_line_str[strlen(EDITOR) + NAME_MAX];	// vi起動用
 
 	unsigned char cnt = 0,
@@ -101,12 +123,12 @@ int main(int argc,char** argv)
 	strcat(command_line_str, EDITOR);
 	if (NULL == getcwd(files_dir_path, PATH_MAX)) {
 		printf("カレントディレクトリの取得に失敗しました。\n");
-		exit(ERROR);
+		exit(EXIT_FAILURE);
 	}
 
 	if (PATH_MAX < (strlen(files_dir_path) + strlen(FILES_DIR_NAME))) {
 		printf("出題ファイルまでのパスの長さが PATE_MAX(4096) 以上です。");
-		exit(ERROR);
+		exit(EXIT_FAILURE);
 	} else {
 		strcat(files_dir_path, FILES_DIR_NAME);
 	}
@@ -115,13 +137,13 @@ int main(int argc,char** argv)
 
 		if (!(files_dir = opendir(files_dir_path))) {
 			printf("%s ディレクトリが存在しません。\n", files_dir_path);
-			exit(ERROR);
+			exit(EXIT_FAILURE);
 		}
 
 		// 出題ファイルが格納されているディレクトリまで移動(エラー処理書く)
 		if ((-1) == chdir(files_dir_path)) {
 			printf("%s ディレクトリへの移動に失敗しました。\n", files_dir_path);
-			exit(ERROR);
+			exit(EXIT_FAILURE);
 		};
 
 		for (files_dp = readdir(files_dir), cnt = 0; files_dp != NULL; files_dp = readdir(files_dir)){
@@ -138,7 +160,7 @@ int main(int argc,char** argv)
 
 		if (0 == cnt) {
 			printf("出題用のファイルが存在しません。\n%s.\nに出題用のファイルを作成してください。\n", files_dir_path);
-			exit(ERROR);
+			exit(EXIT_FAILURE);
 		};
 
 		number_of_files = cnt;		// 出題ファイルの量を代入
@@ -147,7 +169,7 @@ int main(int argc,char** argv)
 		printf("[  0] プログラム終了。\n");
 		printf("[  1] 暗記を始める。\n");
 		printf("[  2] 出題ファイルを編集する。\n");
-		wait_user_input("%hd", &user_input_num);
+		WaitUserInput("%hd", &user_input_num);
 
 		if (1 == user_input_num) {
 			/*	出題ファイル選択ループ	*/
@@ -159,7 +181,7 @@ int main(int argc,char** argv)
 				for (cnt = 0;cnt < number_of_files; cnt++) {
 					printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
 				}
-				wait_user_input("%hd", &user_input_num);
+				WaitUserInput("%hd", &user_input_num);
 
 				/*	入力エラーチェック	*/
 				if (user_input_num > number_of_files) {
@@ -175,7 +197,7 @@ int main(int argc,char** argv)
 			if ((reading_fp = fopen(filelist_s[user_input_num - 1].file_name, "r")) == NULL) {
 				printf("ファイルの読み込みに失敗しました。\n");
 				printf("file open error.\n");
-				exit(ERROR);
+				exit(EXIT_FAILURE);
 			}
 
 		} else if (2 == user_input_num) {
@@ -186,7 +208,7 @@ int main(int argc,char** argv)
 				printf("[  0] メインメニューに戻る。\n");
 				printf("[  1] 既存のファイルを編集する。\n");
 				printf("[  2] 新規ファイルを作成する。\n");
-				wait_user_input("%hd", &user_input_num);
+				WaitUserInput("%hd", &user_input_num);
 
 				if (1 == user_input_num) {
 
@@ -198,7 +220,7 @@ int main(int argc,char** argv)
 						for (cnt = 0;cnt < number_of_files; cnt++) {
 							printf("[%3d] %s\n", filelist_s[cnt].file_number, filelist_s[cnt].file_name);
 						}
-						wait_user_input("%hd", &user_input_num);
+						WaitUserInput("%hd", &user_input_num);
 						/*	入力エラーチェック	*/
 						if (user_input_num > number_of_files) {
 							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
@@ -231,10 +253,10 @@ int main(int argc,char** argv)
 		continue;
 		} else if (0 == user_input_num) {
 			printf("bye.\n");
-			exit(SUCCESS);
+			exit(EXIT_SUCCESS);
 		} else {
 			printf("1か2以外が入力されました。\n");
-			exit(ERROR);
+			exit(EXIT_FAILURE);
 		}
 
 		user_input_num = 0;
@@ -248,10 +270,10 @@ int main(int argc,char** argv)
 			printf("[  3] 解答の文字数が少ない順に出題する。\n");
 			printf("[  4] 解答の文字数が多い順に出題する。\n");
 
-			wait_user_input("%hu", &user_input_num);
+			WaitUserInput("%hu", &user_input_num);
 
 			if (1 == user_input_num) {
-				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
+				question_max = FpReadAndSplit(reading_fp, answer_and_question_s);
 				break;
 			/*	random		*/
 			} else if (2 == user_input_num) {
@@ -294,7 +316,7 @@ int main(int argc,char** argv)
 
 			/*	In order of decreasing number of characters	*/
 			} else if (3 == user_input_num) {
-				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
+				question_max = FpReadAndSplit(reading_fp, answer_and_question_s);
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
 						if (strlen(answer_and_question_s[cnt].answer) > strlen(answer_and_question_s[cnt + cnt1].answer)) {
@@ -318,7 +340,7 @@ int main(int argc,char** argv)
 				break;
 			/*	In descending order of the number of characters		*/
 			} else if (4 == user_input_num) {
-				question_max = fp_read_and_split(reading_fp, answer_and_question_s);
+				question_max = FpReadAndSplit(reading_fp, answer_and_question_s);
 
 				for (cnt = 0; cnt < question_max; cnt++) {
 					for (cnt1 = 1; (cnt + cnt1) < question_max; cnt1++) {
@@ -353,7 +375,7 @@ int main(int argc,char** argv)
 			/*	Select		*/
 			printf("出題数：%d\n", question_max);
 			printf("全問出題しますか?(y/n)\n");
-			wait_user_input("%c", &user_input_y_or_n);
+			WaitUserInput("%c", &user_input_y_or_n);
 
 			if ('y' == user_input_y_or_n) {
 				number_of_start_question = 0;
@@ -367,7 +389,7 @@ int main(int argc,char** argv)
 						/*	Select		*/
 						printf("出題数：%d\n", question_max);
 						printf("何問目から出題しますか?\n数値を入力して下さい。");
-						wait_user_input("%hd", &user_input_num);
+						WaitUserInput("%hd", &user_input_num);
 						/*	入力エラーチェック	*/
 						if (user_input_num > question_max) {
 							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
@@ -386,7 +408,7 @@ int main(int argc,char** argv)
 						printf("\n出題開始行：%d\n", user_input_num);
 						printf("出題数：%d\n", question_max);
 						printf("何問目まで出題しますか?\n数値を入力して下さい");
-						wait_user_input("%hd", &number_of_end_question);
+						WaitUserInput("%hd", &number_of_end_question);
 						/*	入力エラーチェック	*/
 						if (number_of_end_question > question_max) {
 							printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
@@ -408,7 +430,7 @@ int main(int argc,char** argv)
 						/*	Select		*/
 						printf("全出題数：%d\n", question_max);
                                                 printf("何問出題しますか?\n数値を入力して下さい\n");
-						wait_user_input("%hd", &number_of_end_question);
+						WaitUserInput("%hd", &number_of_end_question);
                                                 /*      入力エラーチェック      */
                                                 if (number_of_end_question > question_max) {
                                                         printf("\n実際の問題の量以上の値か、負の値が入力されました。\n");
@@ -426,39 +448,28 @@ int main(int argc,char** argv)
 				printf("y(yes) か n(no) を入力して下さい。\n\n");
 			}
 		}
+
 		/*	出題	*/
-		for (cnt = number_of_start_question, cnt1 = 1; cnt < number_of_end_question; cnt++, cnt1++) {
-
-			printf("question\t: #%hhu\nline number\t: #%lu\n", cnt1, answer_and_question_s[cnt].number);
-			printf("Q: %s\n", answer_and_question_s[cnt].question);
-			wait_user_input("%[^\t\n]", user_input_answer);
-
-			if (!strcmp(answer_and_question_s[cnt].answer, user_input_answer)) {
-				printf("correct!!\n");
-				printf("A: %s\n\n", answer_and_question_s[cnt].answer);
-			} else {
-				printf("miss!!\n");
-				printf("A: %s\n\n", answer_and_question_s[cnt].answer);
-				cnt1--;
-				cnt--;
-			}
-		}
+		Question(number_of_start_question, number_of_end_question, answer_and_question_s);
 
 		for (;;) {
 
-			printf("出題が終わりました。プログラムを終了しますか?(y/n)\n");
-			wait_user_input("%c", &user_input_y_or_n);
+			printf("出題が終わりました。プログラムを終了しますか?\n");
+			printf("r でもう一度同じ出題を繰り返します。(y/n/r)\n");
+			WaitUserInput("%c", &user_input_y_or_n);
 
 			if ('y' == user_input_y_or_n) {
-				break;
+				printf("bye.\n");
+				exit(EXIT_SUCCESS);
 			} else if ('n' == user_input_y_or_n) {
 				question_max = 0;
 				break;
+			} else if ('r' == user_input_y_or_n) {
+				Question(number_of_start_question, number_of_end_question, answer_and_question_s);
 			} else {
-				printf("y(yes) か n(no) を入力して下さい。\n\n");
+				printf("y(yes) か n(no) か r(retry) を入力して下さい。\n\n");
 			}
 		}
-		if ('y' == user_input_y_or_n) break;
 	}
-	exit(SUCCESS);
+	exit(EXIT_SUCCESS);
 };
