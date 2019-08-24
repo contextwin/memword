@@ -12,6 +12,9 @@ Carbonate 炭酸塩
 Bicarbonate 重炭酸塩
 Organic compounds 有機化合物
 Inorganic compounds 無機化合物
+Sodium acetate 酢酸ナトリウム
+Liberation reaction 遊離反応
+Weak acid 弱酸
 
 carbon monoxide = 一酸化炭素 = co
 carbon dioxide = 二酸化炭素 = co2

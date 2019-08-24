@@ -46,16 +46,34 @@ third person : 三人称
      /*主語 + 動詞 + 目的語 + 時*/
 
      You teach math.
-     あなたは数学を教えます。
+     あなたは数学を教える。
      /*teach + 目的語で~を教えると覚える*/
 
      They like this song.
-     彼等はこの歌が好きです。
+     彼等はこの歌が好きだ。
      /*likeは"~が好き"と覚える*/
 
      Mr.Nakakuki plays the guitar.
-     ナカクキ先生はギターをひきます。
+     ナカクキ先生はギターをひく。
      /*主語が三人称、単数形現在形の時には一般動詞にsがつく*/
-     *三単現のs
+     /*三単現のs*/
 
     三人称はI, we, you以外の主語
+
+  一般動詞の否定文
+   hogeはpiyoしないの文
+
+    [例文]
+     I do not (don't) cook breakfast.
+     私は朝食を作らない。
+     /*一般動詞の前にdo not (don't)を置く*/
+
+     Mr.Nakakuki does not (doesn't) play the guitar.
+     ナカクキ先生はギターを弾かない。
+     /*三単現の時の否定文はdoes not (doesn't) + 動詞の原型*/
+
+     次の文は間違いである
+　　 I am not play the guitar.
+     私はギターを弾かない。
+     /*be動詞と一般動詞を一つの文で一緒に使ってはいけない*/
+     /*1つの文に、動詞は1つ*/
