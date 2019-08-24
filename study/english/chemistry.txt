@@ -24,8 +24,7 @@ The characteristic and structure of organic compounds.
  有機化合物の特徴
 
    organic compunds are carbon atom.
-    An organic compound is belong chemical compounds,
+    An organic compound is belongs to chemical compounds,
     and all organic compounds are carbon atoms contain.
-    but a carbon monoxide (co) .. a carbon dioxide (co2)
-    .. a carbonate and a bicarbonate are belong inorganic compounds.
-
+    But a carbon monoxide (co) .. a carbon dioxide (co2)
+    .. a carbonate and a bicarbonate belong to inorganic compounds.
