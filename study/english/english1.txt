@@ -183,7 +183,7 @@ example : 例文
                     |                        |            | Nancy       |
 -------------------------------------------------------------------------
 
- 疑問文への答え方
+ 疑問文への返答
   [例文]
    
    疑問文 : Are you Tom ?
@@ -207,13 +207,12 @@ example : 例文
     はい、そうです。/ いいえ、ちがいます。
     /*this の疑問文にはitで答える*/
 
-   質問文 : Is that a window ?
+   疑問文 : Is that a window ?
    あれは窓ですか。
 
     Yes, it is. / No, it isn't.
     はい、そうです。/ いいえ、ちがいます。
     /*thatの疑問文もthisと同じくitで答える*/
-
 
    疑問文 : Is Ken a soccer fan ?
    ケンはサッカーファンですか。
@@ -222,7 +221,7 @@ example : 例文
      はい、そうです。 / いいえ、ちがいます。
      /*Kenは男性なのでheに置き換える*/
 
-   質問文 : Is the girl Kate ?
+   疑問文 : Is the girl Kate ?
      Yes, she is. / No, she isn't.
      はい、そうです。 / いいえ、ちがいます。 
      /*the girlは女性なのでsheにおきかえる。*/

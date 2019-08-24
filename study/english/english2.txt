@@ -1,4 +1,3 @@
-
 一般動詞
  一般動詞動詞の意味は(~をする)など、動作を現す意味。
 
@@ -61,7 +60,7 @@ third person : 三人称
     三人称はI, we, you以外の主語
 
   一般動詞の否定文
-   hogeはpiyoしないの文
+   hogeはpiyoしないの作り方
 
     [例文]
      I do not (don't) cook breakfast.
@@ -72,8 +71,35 @@ third person : 三人称
      ナカクキ先生はギターを弾かない。
      /*三単現の時の否定文はdoes not (doesn't) + 動詞の原型*/
 
-     次の文は間違いである
+     !!次の文は間違いである
 　　 I am not play the guitar.
      私はギターを弾かない。
      /*be動詞と一般動詞を一つの文で一緒に使ってはいけない*/
      /*1つの文に、動詞は1つ*/
+
+  一般動詞の疑問文
+   hogeはpiyoを行うかの作り方
+
+    [例文]
+     Do you cook breakfast everyday?
+     あなたは毎日朝食を作りますか？
+     /*動詞cook自体は移動しない*/
+
+     Does Mr.Nakakuki play the guitar?
+     ナカクキ先生はギターを弾きますか。
+     /*主語が三単現なのでDoes、動詞は原型に戻りplay*/
+
+     !!次の文は間違いである
+     Are you play the guitar?
+     /*be動詞と一般動詞は一緒に使えない*/
+ 
+ 一般動詞の疑問文への返答
+
+   [例文]
+    Do you study English ? / Yes, I do.
+    あなたは英語を勉強しますか / はい、します。
+    /*Yes, I am.と答えては行けない、Doで聞かれたらDoで返す*/
+
+    Do you study English ? / No, I don't.
+    あなたは英語を勉強しますか / いいえ、しません。
+    /*No, I don't.と答えては行けない、Doで聞かれたらdon'tで返す*/
