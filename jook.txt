@@ -1,0 +1,1 @@
+man bash | sed 's/./&\n/g' | awk -v mx=$COLUMNS -v my=$LINES 'BEGIN{x=y=e=f=1}{if(x==mx||!x){e*=-1};if(y==my||!y){f*=-1};x+=e;y+=f;printf "\033[%s;%sH%s",y,x,$1;for (a=0;a<400000;a++){}}'
