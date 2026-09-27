@@ -1,11 +1,35 @@
 git clone https://github.com/contextwin/memword.git
 
+概要:
 元々、作者が英単語を暗記するために作成しました。
 バグ報告や、批評をお待ちしております。
 https://twitter.com/UPkYZmtLJB4GUcA
 
 sampleの問題を用意してますがsampleの問題は、クライアントに日本語環境がインストールされていることを期待してます。
 が、アルファベットでアルファベットを説明する用途であれば日本語環境なしでも使用できます。
+
+ビルド要件:
+memwordのビルドのためにC言語の処理系(コンパイラ)が必要です。
+
+もしも、どのコンパイラを用いればいいかわからなければ。
+build-essentialを導入することをおすすめします。
+
+aptコマンドでbuild-essentialを導入する場合,
+sudo apt install build-essential
+を実行して下さい。
+
+build-essentialを導入すると、主に以下のようなツールがまとめてインストールされます。
+gcc       GNU Cコンパイラ
+g++       GNU C++コンパイラ
+make      Makefileからビルドを実行するプログラム
+libc6-dev C言語用の標準ライブラリ開発ファイル
+dpkg-dev  Debianパッケージ開発用ツール
+
+clangというコンパイラもとても有名で良い手段だと思いますが、
+しかしbuild-essentialのmakeというツールは色々と出番があるでしょうから、このREADMEではbuild-essentialをおすすめします。
+
+上記の準備ができた状態でmemwordディレクトリ内でmakeコマンドを実行してください。
+別にmakeを用いなくてもビルドできますが、この方法が現状では一番楽で一般的な方法だと個人的に思っています。
 
 このコードはそのままでは、
 ユーザのカレントディレクトリにFilesという名前のディレクトリが作成されていて、その中に出題ファイルがあることを期待しています。
